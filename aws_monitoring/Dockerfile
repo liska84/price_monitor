@@ -1,15 +1,30 @@
-# Use an official Python runtime as a parent image, with support for Chrome
+# Use an official Python runtime as a parent image, with support for Firefox
 FROM python:3.8-slim-buster
 
-# Install Chrome
-RUN apt-get update && apt-get install -y wget gnupg2 cron \
-    && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && apt install -y ./google-chrome-stable_current_amd64.deb
+# Install necessary packages including dependencies for Firefox and Xvfb
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg2 \
+    cron \
+    firefox-esr \
+    xvfb \
+    libgl1-mesa-dri \
+    libgl1-mesa-glx \
+    libdbus-glib-1-2 \
+    libxt6 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Geckodriver for Firefox
+RUN wget -O /tmp/geckodriver.tar.gz https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz \
+    && tar -xzf /tmp/geckodriver.tar.gz -C /usr/local/bin \
+    && rm /tmp/geckodriver.tar.gz
+
+# Set up Xvfb
+ENV DISPLAY=:99
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV DISPLAY=:99
 
 # Set the working directory in the container
 WORKDIR /app
@@ -32,5 +47,7 @@ RUN chmod 0644 /etc/cron.d/my-crontab \
     && crontab /etc/cron.d/my-crontab \
     && touch /var/log/cron.log
 
-# CMD to keep the container running and start cron
-CMD cron && tail -f /var/log/cron.log
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

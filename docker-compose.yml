@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./aws_monitoring 
+      dockerfile: Dockerfile
+    command: >
+      sh -c "cron &&
+             tail -f /var/log/cron.log"
+    volumes:
+      - ./aws_monitoring:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - DESTINATION_PHONE_NUMBER=${DESTINATION_PHONE_NUMBER}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
