@@ -10,7 +10,7 @@ driver = webdriver.Firefox(options=firefox_options)
 
 class Command(BaseCommand):
     help = "Checks https://skillbuilder.aws/subscriptions for changes in individual annual subscription price and sends an SMS notification if changes are detected."
-    CHECK = '$444'
+    CHECK = '$449'
 
     def handle(self, *args, **options):
         driver.get('https://skillbuilder.aws/subscriptions')
